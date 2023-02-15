@@ -10,41 +10,44 @@
 
 char* readline();
 
-typedef struct SinglyLinkedListNode SinglyLinkedListNode;
-typedef struct SinglyLinkedList SinglyLinkedList;
+typedef struct DoublyLinkedListNode DoublyLinkedListNode;
+typedef struct DoublyLinkedList DoublyLinkedList;
 
-struct SinglyLinkedListNode {
+struct DoublyLinkedListNode {
     int data;
-    SinglyLinkedListNode* next;
+    DoublyLinkedListNode* next;
+    DoublyLinkedListNode* prev;
 };
 
-struct SinglyLinkedList {
-    SinglyLinkedListNode* head;
-    SinglyLinkedListNode* tail;
+struct DoublyLinkedList {
+    DoublyLinkedListNode* head;
+    DoublyLinkedListNode* tail;
 };
 
-SinglyLinkedListNode* create_singly_linked_list_node(int node_data) {
-    SinglyLinkedListNode* node = malloc(sizeof(SinglyLinkedListNode));
+DoublyLinkedListNode* create_doubly_linked_list_node(int node_data) {
+    DoublyLinkedListNode* node = malloc(sizeof(DoublyLinkedListNode));
 
     node->data = node_data;
     node->next = NULL;
+    node->prev = NULL;
 
     return node;
 }
 
-void insert_node_into_singly_linked_list(SinglyLinkedList** singly_linked_list, int node_data) {
-    SinglyLinkedListNode* node = create_singly_linked_list_node(node_data);
+void insert_node_into_doubly_linked_list(DoublyLinkedList** doubly_linked_list, int node_data) {
+    DoublyLinkedListNode* node = create_doubly_linked_list_node(node_data);
 
-    if (!(*singly_linked_list)->head) {
-        (*singly_linked_list)->head = node;
+    if (!(*doubly_linked_list)->head) {
+        (*doubly_linked_list)->head = node;
     } else {
-        (*singly_linked_list)->tail->next = node;
+        (*doubly_linked_list)->tail->next = node;
+        node->prev = (*doubly_linked_list)->tail;
     }
 
-    (*singly_linked_list)->tail = node;
+    (*doubly_linked_list)->tail = node;
 }
 
-void print_singly_linked_list(SinglyLinkedListNode* node, char* sep, FILE* fptr) {
+void print_doubly_linked_list(DoublyLinkedListNode* node, char* sep, FILE* fptr) {
     while (node) {
         fprintf(fptr, "%d", node->data);
 
@@ -56,9 +59,9 @@ void print_singly_linked_list(SinglyLinkedListNode* node, char* sep, FILE* fptr)
     }
 }
 
-void free_singly_linked_list(SinglyLinkedListNode* node) {
+void free_doubly_linked_list(DoublyLinkedListNode* node) {
     while (node) {
-        SinglyLinkedListNode* temp = node;
+        DoublyLinkedListNode* temp = node;
         node = node->next;
 
         free(temp);
@@ -68,29 +71,32 @@ void free_singly_linked_list(SinglyLinkedListNode* node) {
 /*
  * Complete the 'reverse' function below.
  *
- * The function is expected to return an INTEGER_SINGLY_LINKED_LIST.
- * The function accepts INTEGER_SINGLY_LINKED_LIST llist as parameter.
+ * The function is expected to return an INTEGER_DOUBLY_LINKED_LIST.
+ * The function accepts INTEGER_DOUBLY_LINKED_LIST llist as parameter.
  */
 
 /*
  * For your reference:
  *
- * SinglyLinkedListNode {
+ * DoublyLinkedListNode {
  *     int data;
- *     SinglyLinkedListNode* next;
+ *     DoublyLinkedListNode* next;
+ *     DoublyLinkedListNode* prev;
  * };
  *
  */
 
-SinglyLinkedListNode* reverse(SinglyLinkedListNode* llist) {
-    SinglyLinkedListNode* t=llist;
-    SinglyLinkedListNode* prev=NULL;
-    while(t!=NULL)
+DoublyLinkedListNode* reverse(DoublyLinkedListNode* llist) {
+    DoublyLinkedListNode* t;
+    
+    while(llist!=NULL)
     {
-        llist=t;        
-        t=llist->next;
-        llist->next=prev;
-        prev=llist;
+        t=llist->prev;
+        llist->prev=llist->next;
+        llist->next=t;
+        if(llist->prev==NULL)
+            break;
+        llist=llist->prev;
     }
     return llist;
 }
@@ -99,14 +105,14 @@ int main()
 {
     FILE* fptr = fopen(getenv("OUTPUT_PATH"), "w");
 
-    char* tests_endptr;
-    char* tests_str = readline();
-    int tests = strtol(tests_str, &tests_endptr, 10);
+    char* t_endptr;
+    char* t_str = readline();
+    int t = strtol(t_str, &t_endptr, 10);
 
-    if (tests_endptr == tests_str || *tests_endptr != '\0') { exit(EXIT_FAILURE); }
+    if (t_endptr == t_str || *t_endptr != '\0') { exit(EXIT_FAILURE); }
 
-    for (int tests_itr = 0; tests_itr < tests; tests_itr++) {
-        SinglyLinkedList* llist = malloc(sizeof(SinglyLinkedList));
+    for (int t_itr = 0; t_itr < t; t_itr++) {
+        DoublyLinkedList* llist = malloc(sizeof(DoublyLinkedList));
         llist->head = NULL;
         llist->tail = NULL;
 
@@ -123,17 +129,17 @@ int main()
 
             if (llist_item_endptr == llist_item_str || *llist_item_endptr != '\0') { exit(EXIT_FAILURE); }
 
-            insert_node_into_singly_linked_list(&llist, llist_item);
+            insert_node_into_doubly_linked_list(&llist, llist_item);
         }
 
-        SinglyLinkedListNode* llist1 = reverse(llist->head);
+        DoublyLinkedListNode* llist1 = reverse(llist->head);
 
         char *sep = " ";
 
-        print_singly_linked_list(llist1, sep, fptr);
+        print_doubly_linked_list(llist1, sep, fptr);
         fprintf(fptr, "\n");
 
-        free_singly_linked_list(llist1);
+        free_doubly_linked_list(llist1);
     }
 
     fclose(fptr);
